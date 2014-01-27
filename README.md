@@ -12,7 +12,7 @@ for more information.
 Citation
 --------
 
-If you use this documentation or the mps-sim software for your own research, please provide the link to this software repository in your manuscript:
+If you use scripts from this repository for your own research, please provide the link to this software repository in your manuscript:
 
     https://github.com/mgharvey/misc
 
