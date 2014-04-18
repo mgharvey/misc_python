@@ -1,7 +1,7 @@
 INTRODUCTION
 -------
 
-misc is miscellaneous code for manipulating genetic data
+misc_python is miscellaneous code for manipulating genetic data
 
 License
 -------
@@ -14,7 +14,7 @@ Citation
 
 If you use scripts from this repository for your own research, please provide the link to this software repository in your manuscript:
 
-    https://github.com/mgharvey/misc
+    https://github.com/mgharvey/misc_python
 
 Usage, etc.
 --------
