@@ -19,11 +19,7 @@ Usage: python alignments_from_stacks_fasta.py in_file [--fasta] [--phylip] [--ne
 
 import os
 import sys
-import random
 import argparse
-import dendropy
-from dendropy import popgenstat
-from Bio import AlignIO
 
 
 def get_args():
