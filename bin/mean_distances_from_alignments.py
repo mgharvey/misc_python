@@ -185,7 +185,7 @@ def main():
 		for j, all_sample2 in enumerate(all_samples):
 			p_distances.write(str(p_mean.item((i, j)))) # Get distances from matrices
 			jc_distances.write(str(jc_mean.item((i, j))))
-			p_stdev.write(str(p_std.item((i, j)))) # Get distances from matrices
+			p_stdev.write(str(p_std.item((i, j)))) # Get std devs from matrices
 			jc_stdev.write(str(jc_std.item((i, j))))
 			p_distances.write("\t")
 			jc_distances.write("\t")
