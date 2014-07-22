@@ -8,12 +8,12 @@ Author: Michael G. Harvey
 Date: 21 July 2014
 
 Description: Calculate mean pairwise distances between samples in a dataset from multiple
-alignments. Not all samples have to be in each alignment (each distance will be calculated
-only from those alignments with the respective samples). Both uncorrected (p) distances 
-and jukes-cantor distances are calculated. Heterozygous sites can be included as IUPAC
-ambiguity codes and included in the calculations (each allele counts for half of the 
-distance at that site for that individual). Be sure sample names are the same in each
-alignment.
+alignments (as well as standard deviations of those distances). Not all samples have to be 
+in each alignment (each distance will be calculated only from those alignments with the 
+respective samples). Both uncorrected (p) distances and jukes-cantor distances are 
+calculated. Heterozygous sites can be included as IUPAC ambiguity codes and included in 
+the calculations (each allele counts for half of the distance at that site for that 
+individual). Be sure sample names are the same in each alignment.
 
 Usage:
 
@@ -129,8 +129,10 @@ def main():
 	for prefile in prefiles:
 		if not prefile.startswith('.'):
 			files.append(prefile)
-	p_distances = open("./p_distances.txt", 'wb')
+	p_distances = open("./p_distances.txt", 'wb') # Open output files
 	jc_distances = open("./jc_distances.txt", 'wb')
+	p_stdev = open("./p_std.txt", 'wb')
+	jc_stdev = open("./jc_std.txt", 'wb')
 	all_samples = list()
 	for file in files: # Loop to get list of all samples in dataset
 		if os.stat("{0}/{1}".format(args.in_dir, file))[6] == 0:	
@@ -158,27 +160,45 @@ def main():
 			jc_array = arrays[1]
 	p_mean = p_array.mean(axis=2) # Mean for each distance across loci
 	jc_mean = jc_array.mean(axis=2)
+	p_std = p_array.std(axis=2) # Std. dev. for each distance across loci
+	jc_std = jc_array.std(axis=2)
 	
 	# Write mean distances to output file	
 	p_distances.write("\t")
 	jc_distances.write("\t")
+	p_stdev.write("\t")
+	jc_stdev.write("\t")
 	for all_sample in all_samples:
 		p_distances.write("{0}\t".format(all_sample))
 		jc_distances.write("{0}\t".format(all_sample))
+		p_stdev.write("{0}\t".format(all_sample))
+		jc_stdev.write("{0}\t".format(all_sample))
 	p_distances.write("\n")
 	jc_distances.write("\n")
+	p_stdev.write("\n")
+	jc_stdev.write("\n")
 	for i, all_sample1 in enumerate(all_samples):
 		p_distances.write("{0}\t".format(all_sample1))
 		jc_distances.write("{0}\t".format(all_sample1))
+		p_stdev.write("{0}\t".format(all_sample1))
+		jc_stdev.write("{0}\t".format(all_sample1))
 		for j, all_sample2 in enumerate(all_samples):
 			p_distances.write(str(p_mean.item((i, j)))) # Get distances from matrices
 			jc_distances.write(str(jc_mean.item((i, j))))
+			p_stdev.write(str(p_std.item((i, j)))) # Get distances from matrices
+			jc_stdev.write(str(jc_std.item((i, j))))
 			p_distances.write("\t")
 			jc_distances.write("\t")
+			p_stdev.write("\t")
+			jc_stdev.write("\t")
 		p_distances.write("\n")
 		jc_distances.write("\n")
+		p_stdev.write("\n")
+		jc_stdev.write("\n")
 	p_distances.close()
 	jc_distances.close()
+	p_stdev.close()
+	jc_stdev.close()
 		
 if __name__ == '__main__':
     main()
