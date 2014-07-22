@@ -10,7 +10,9 @@ Date: 21 July 2014
 Description: Calculate mean pairwise distances between samples in a dataset from multiple
 alignments. Not all samples have to be in each alignment (each distance will be calculated
 only from those alignments with the respective samples). Both uncorrected (p) distances 
-and jukes-cantor distances are calculated.
+and jukes-cantor distances are calculated. Heterozygous sites can be included as IUPAC
+ambiguity codes and included in the calculations (each allele counts for half of the 
+distance at that site for that individual).
 
 Usage:
 
