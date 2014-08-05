@@ -149,8 +149,6 @@ def main():
 						alleles.append(ref_allele)
 						depths.append(ref_depth)
 					alt_depth = info_parts[4]
-					print ref_depth, alt_depth
-					print ref_allele, alt_allele
 					if "," not in alt_allele: # If only a single alt allele
 						if int(alt_depth) >= args.min_cov:
 							alleles.append(alt_allele)
@@ -175,7 +173,6 @@ def main():
 							if len(list(alleles[0])) == len(list(alleles[1])) == 1:
 								base = unphase(alleles[0], alleles[1])
 							else:
-								print depths, alleles
 								if depths[0] > depths[1]:
 									base = alleles[0]
 								elif depths[1] > depths[0]:
@@ -185,7 +182,6 @@ def main():
 						base = alleles[0]
 					elif len(alleles) == 0:
 						base = "n"*len(list(ref_allele))
-					print base
 			if base is not None:
 				seq.append(base)
 			prev_name = name
