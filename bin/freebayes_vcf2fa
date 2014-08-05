@@ -56,7 +56,7 @@ def get_args():
 	parser.add_argument(
 			"min_cov",
 			type=int,
-			help="""The minimum read depth to output a site in fasta file"""
+			help="""The minimum number of observations to output an allele to fasta file"""
 		)
 	return parser.parse_args()
 
@@ -131,8 +131,9 @@ def main():
 			info = parts[7]
 			match = re.search('DP=(\d{1,10})', info)
 			depth = int(match.group(1))
+			base = None 
 			if depth < args.min_cov: # Output n's for sites with low read depth
-				base = "n"
+				base = "n"*len(list(ref_allele))
 			else:
 				ref_allele = parts[3]
 				alt_allele = parts[4]
@@ -144,22 +145,22 @@ def main():
 					gt_info = parts[-1]
 					info_parts = gt_info.split(":")
 					ref_depth = int(info_parts[2])
-					if ref_depth > args.min_cov: # If sufficient reads for reference
+					if ref_depth >= args.min_cov: # If sufficient reads for reference
 						alleles.append(ref_allele)
 						depths.append(ref_depth)
 					alt_depth = info_parts[4]
 					print ref_depth, alt_depth
 					print ref_allele, alt_allele
 					if "," not in alt_allele: # If only a single alt allele
-						if int(alt_depth) > args.min_cov:
+						if int(alt_depth) >= args.min_cov:
 							alleles.append(alt_allele)
 							depths.append(int(alt_depth))
 					elif "," in alt_allele: # If multiple alt alleles
 						list_alt_alleles = alt_allele.split(",")
 						alt_depths = alt_depth.split(",")
 					 	for i, list_alt_allele in enumerate(list_alt_alleles):
-					 		if int(alt_depths[i]) > args.min_cov:
-					 			alleles.append(alt_allele)
+					 		if int(alt_depths[i]) >= args.min_cov:
+					 			alleles.append(list_alt_allele)
 					 			depths.append(int(alt_depths[i]))
 					if len(alleles) > 2:
 						summary.write("{0}\n".format(name))
@@ -174,15 +175,19 @@ def main():
 							if len(list(alleles[0])) == len(list(alleles[1])) == 1:
 								base = unphase(alleles[0], alleles[1])
 							else:
+								print depths, alleles
 								if depths[0] > depths[1]:
-									base == alleles[0]
+									base = alleles[0]
 								elif depths[1] > depths[0]:
-									base == alleles[1]
+									base = alleles[1]
 							k += 1
 					elif len(alleles) == 1:
 						base = alleles[0]
+					elif len(alleles) == 0:
+						base = "n"*len(list(ref_allele))
 					print base
-			seq.append(base)
+			if base is not None:
+				seq.append(base)
 			prev_name = name
 			firstline = False
 	print "{0} loci with paralogous reads detected and removed from output".format(j)
