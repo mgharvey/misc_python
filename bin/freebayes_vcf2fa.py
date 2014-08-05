@@ -187,7 +187,7 @@ def main():
 			prev_name = name
 			firstline = False
 	print "{0} loci with paralogous reads detected and removed from output".format(j)
-	print "{0} total polymorphisms detected".format(k)
+	print "{0} heterozygous sites (diploid samples only)".format(k)
 	infile.close()
 	out.close()
 									
