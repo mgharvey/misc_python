@@ -131,11 +131,11 @@ def main():
 			match = re.search('DP=(\d{1,10})', info)
 			depth = int(match.group(1))
 			base = None 
+			ref_allele = parts[3]
+			alt_allele = parts[4]
 			if depth < args.min_cov: # Output n's for sites with low read depth
 				base = "n"*len(list(ref_allele))			
 			else:
-				ref_allele = parts[3]
-				alt_allele = parts[4]
 				if alt_allele.rstrip() == ".": # If site corresponds to reference
 					base = ref_allele
 				else:
