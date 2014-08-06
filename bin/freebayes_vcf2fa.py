@@ -122,7 +122,7 @@ def main():
 			parts = line.split()
 			nameparts = parts[0].split("|") # Remove for dist
 			name = nameparts[0] # Edit for dist
-			if not firstline == True:
+			if not firstline == True: # Loop to print each locus on separate line
 				if name != prev_name:
 					out.write(">{0}\n".format(name))
 					out.write("{0}\n".format(''.join(seq)))
@@ -163,40 +163,39 @@ def main():
 					gt = info_parts[0]
 					gt_parts = gt.split("/")
 					gt_filtereds = list()
-					for gt_part in gt_parts:
+					for gt_part in gt_parts: # Make sure alleles in gt have enough coverage
 						if depths[int(gt_part)] >= args.min_cov:
 							gt_filtereds.append(gt_part)
 					gt_alleles = list()
 					gt_depths = list()
-					for gt_filtered in gt_filtereds:
-						gt_alleles.append(alleles[int(gt_filtered)])
+					for gt_filtered in gt_filtereds: # Make lists of alleles and coverages
+						gt_alleles.append(alleles[int(gt_filtered)]) # for filtered gts
 						gt_depths.append(depths[int(gt_filtered)])
 					gt_allele_set = list()
-					gt_allele_set = list(set(gt_alleles))
+					gt_allele_set = list(set(gt_alleles)) # List of unique filtered alleles
 
 					# Call bases
-					if len(gt_allele_set) > 2:
+					if len(gt_allele_set) > 2: # If >2 called alleles
 						summary.write("{0}\n".format(name))
 						print "Locus {0} contains paralogous reads".format(name)
 						j += 1
-					elif len(gt_allele_set) == 2:
-						if args.ploidy == 1:
+					elif len(gt_allele_set) == 2: # If 2 called alleles 
+						if args.ploidy == 1: # If haploid
 							summary.write("{0}\n".format(name))
 							print "Locus {0} contains paralogous reads".format(name)
 							j += 1							
-						elif args.ploidy == 2:
+						elif args.ploidy == 2: # If diploid
 							if len(gt_allele_set[0]) == len(gt_allele_set[1]) == 1:
 								base = unphase(gt_allele_set[0], gt_allele_set[1])
-							else:
+							else: # Deal with heterozygous complex polymorphisms
 								# Change this to be based on coverage?
 								gt_allele_set[0]
 							k += 1
-					elif len(gt_allele_set) == 1:
+					elif len(gt_allele_set) == 1: # If 1 called allele
 						base = gt_alleles[0]
-					elif len(gt_allele_set) == 0:
-						base = "n"*len(list(ref_allele))
-					#print base
-			if base is not None:
+					elif len(gt_allele_set) == 0: # If no alleles called
+						base = "n"*len(list(ref_allele)) # Insert n's
+			if base is not None: # If a genotype could be called
 				seq.append(base)
 			prev_name = name
 			firstline = False
