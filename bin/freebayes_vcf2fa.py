@@ -191,10 +191,6 @@ def main():
 								# Change this to be based on coverage?
 								gt_allele_set[0]
 							k += 1
-							print gt_filtereds
-							print gt_alleles
-							print gt_depths
-							print base
 					elif len(gt_allele_set) == 1:
 						base = gt_alleles[0]
 					elif len(gt_allele_set) == 0:
