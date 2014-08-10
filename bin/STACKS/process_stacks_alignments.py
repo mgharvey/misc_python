@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 """
 
 Name: process_stacks_alignments.py
@@ -7,11 +9,26 @@ Date: 30 July 2014
 
 Description: To be used following processing with alignments_from_stacks_fasta.py. 
 Collapses alleles into single sequences with ambiguity codes for heterozygous sites, 
-removes alignments with only one individual, and relabels sampling using a sample map.
+removes alignments with only one individual, and relabels samples using a sample map.
 
 Usage:
 
 python process_stacks_alignments.py in_dir sample_map out_dir
+
+The sample map is a separate file that looks like this:
+
+Sample_1:Rallus_crepitans_63400
+Sample_2:Rallus_crepitans_63404
+Sample_3:Rallus_crepitans_63475
+Sample_4:Rallus_crepitans_63477
+Sample_5:Rallus_crepitans_63464
+Sample_6:Rallus_crepitans_63467
+Sample_7:Rallus_crepitans_63471
+Sample_8:Rallus_crepitans_63473
+
+The sample numbers correspond to the Sample ID's assigned by Stacks. You can find these in
+the .tsv files (e.g. see the second column in the .tags.tsv files) for each individual 
+that are output by Stacks.
 
 """
 
@@ -57,6 +74,7 @@ def main():
 		my_samples.append(parts[1].rstrip())
 	sample_key = dict(zip(stacks_samples, my_samples))
 	for file in files:
+		print file
 		infile = open("{0}/{1}".format(args.in_dir, file))
 		new_align = {}
 		names = list()
@@ -99,7 +117,9 @@ def main():
 			out.write(" {0} {1}\n".format(len(new_align), length))
 			for key in new_align:
 				out.write("{0}  {1}\n".format(key, new_align[key]))
+			out.close()
 		infile.close()
+	map_file.close()
 				
 if __name__ == '__main__':
     main()

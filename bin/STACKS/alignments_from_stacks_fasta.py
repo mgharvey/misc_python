@@ -8,12 +8,19 @@ Author: Michael G. Harvey
 Date: 6 June 2014
 
 Description: Convert the fasta output from the populations module of the Stacks (Catchen et al. 
-2013) pipeline to alignments for coalescent analyses. Designed for use with diploid data. For 
-convenience, files can be output in fasta, phylip-like (no limits on sample name length), or nexus 
-format. There is an option to remove those alignments containing only a single sequence.
+2013) pipeline to alignments for coalescent analyses. Warning messages will be printed if the
+number of alleles at a locus exceeds the expected ploidy level of the samples (which must be
+specified by the user), but these loci will still be printed to output. Note that Stacks will 
+often output more alleles than the ploidy level if the arguments "--max_locus_stacks" and "-H" 
+are not used to restrict the number of alleles in the ustacks program. For convenience, files 
+can be output in fasta, phylip-like (no limits on sample name length), or nexus format. There 
+is an option to remove those alignments containing only a single sequence. Haploid and diploid 
+samples can be further processed with process_stacks_alignments.py (also in this repository).
 
-Usage: python alignments_from_stacks_fasta.py in_file [--fasta] [--phylip] [--nexus] [--remove_singletons]
+Usage: python alignments_from_stacks_fasta.py in_file ploidy [--fasta] [--phylip] [--nexus] [--remove_singletons]
 
+Where in_file is the location of the input batch*.fa file from Stacks, ploidy is an integer,
+and the other options are set by typing the string in the brackets.
 
 """
 
@@ -29,6 +36,11 @@ def get_args():
 			"in_file",
 			type=str,
 			help="""The input file of fasta sequences from stacks populations module"""
+		)
+	parser.add_argument(
+			"ploidy",
+			type=int,
+			help="""The ploidy of the study samples (an integer value)"""
 		)
 	parser.add_argument(
 			"--fasta",
@@ -53,55 +65,50 @@ def get_args():
 	return parser.parse_args()
 
 
-def fasta(align_rows, locus):
-	out = open("./out/locus_{0}.fa".format(locus), 'wb')
+def fasta(align_rows, locus, ploidy):
+	out = open("./out_fasta/locus_{0}.fa".format(locus), 'wb')
 	samples = list()
 	for align_row in align_rows: # Make a list of samples in this locus
 		samples.append(str(align_row[0]))		
-	second = False
+
+	i = 0
+	allele_labs = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p']
 	for align_row in align_rows:
-		if samples.count(str(align_row[0])) == 1: # If sample is only present 1x
-			out.write(">Sample_{0}a\n{1}\n".format(align_row[0], align_row[1]))
-		elif samples.count(str(align_row[0])) == 2: # If sample is present 2x (het)
-			if second == False:
-				out.write(">Sample_{0}a\n{1}\n".format(align_row[0], align_row[1]))
-				second = True
-			elif second == True:
-				out.write(">Sample_{0}b\n{1}\n".format(align_row[0], align_row[1]))
-				second = False
-		elif samples.count(str(align_row[0])) > 2:
-			print "Sample {0} contains >2 alleles. Exiting.".format(align_row[0])
-			exit()
+		if samples.count(str(align_row[0])) > ploidy:
+			print  "WARNING: Number of alleles > ploidy at locus {0}, sample {0}".format(locus, align_row[0]) 
+		if i < (samples.count(str(align_row[0]))-1):		
+			out.write(">Sample_{0}{1}\n{2}\n".format(align_row[0], allele_labs[i], align_row[1]))
+			i += 1
+		elif i == (samples.count(str(align_row[0]))-1):
+			out.write(">Sample_{0}{1}\n{2}\n".format(align_row[0], allele_labs[i], align_row[1]))
+			i = 0
 	out.close()			
 	align_rows = list()
-	
-	
-def phylip(align_rows, locus):
-	out = open("./out/locus_{0}.phy".format(locus), 'wb')
+
+
+def phylip(align_rows, locus, ploidy):
+	out = open("./out_phylip/locus_{0}.phy".format(locus), 'wb')
 	out.write(" {0} {1}\n".format(len(align_rows), len(align_rows[0][1])))
 	samples = list()
 	for align_row in align_rows: # Make a list of samples in this locus
 		samples.append(str(align_row[0]))		
-	second = False
+	i = 0
+	allele_labs = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p']
 	for align_row in align_rows:
-		if samples.count(str(align_row[0])) == 1: # If sample is only present 1x
-			out.write("Sample_{0}a  {1}\n".format(align_row[0], align_row[1]))
-		elif samples.count(str(align_row[0])) == 2: # If sample is present 2x (het)
-			if second == False:
-				out.write("Sample_{0}a  {1}\n".format(align_row[0], align_row[1]))
-				second = True
-			elif second == True:
-				out.write("Sample_{0}b  {1}\n".format(align_row[0], align_row[1]))
-				second = False
-		elif samples.count(str(align_row[0])) > 2:
-			print "Sample {0} contains >2 alleles. Exiting.".format(align_row[0])
-			exit()
+		if samples.count(str(align_row[0])) > ploidy:
+			print  "WARNING: Number of alleles > ploidy at locus {0}, sample {0}".format(locus, align_row[0]) 
+		if i < (samples.count(str(align_row[0]))-1):		
+			out.write("Sample_{0}{1}  {2}\n".format(align_row[0], allele_labs[i], align_row[1]))
+			i += 1
+		elif i == (samples.count(str(align_row[0]))-1):
+			out.write("Sample_{0}{1}  {2}\n".format(align_row[0], allele_labs[i], align_row[1]))
+			i = 0
 	out.close()			
 	align_rows = list()
 
 
-def nexus(align_rows, locus):
-	out = open("./out/locus_{0}.nex".format(locus), 'wb')
+def nexus(align_rows, locus, ploidy):
+	out = open("./out_nexus/locus_{0}.nex".format(locus), 'wb')
 	out.write("#NEXUS\n")
 	out.write("Begin data;\n")
 	out.write("Dimensions ntax={0} nchar={1}\n".format(len(align_rows), len(align_rows[0][1])))
@@ -110,20 +117,17 @@ def nexus(align_rows, locus):
 	samples = list()
 	for align_row in align_rows: # Make a list of samples in this locus
 		samples.append(str(align_row[0]))		
-	second = False
+	i = 0
+	allele_labs = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p']
 	for align_row in align_rows:
-		if samples.count(str(align_row[0])) == 1: # If sample is only present 1x
-			out.write("Sample_{0}a	{1}\n".format(align_row[0], align_row[1]))
-		elif samples.count(str(align_row[0])) == 2: # If sample is present 2x (het)
-			if second == False:
-				out.write("Sample_{0}a	{1}\n".format(align_row[0], align_row[1]))
-				second = True
-			elif second == True:
-				out.write("Sample_{0}b	{1}\n".format(align_row[0], align_row[1]))
-				second = False
-		elif samples.count(str(align_row[0])) > 2:
-			print "Sample {0} contains >2 alleles. Exiting.".format(align_row[0])
-			exit()
+		if samples.count(str(align_row[0])) > ploidy:
+			print  "WARNING: Number of alleles > ploidy at locus {0}, sample {0}".format(locus, align_row[0]) 
+		if i < (samples.count(str(align_row[0]))-1):		
+			out.write("Sample_{0}{1}  {2}\n".format(align_row[0], allele_labs[i], align_row[1]))
+			i += 1
+		elif i == (samples.count(str(align_row[0]))-1):
+			out.write("Sample_{0}{1}  {2}\n".format(align_row[0], allele_labs[i], align_row[1]))
+			i = 0
 	out.write(";\n")
 	out.write("End;")
 	out.close()			
@@ -133,7 +137,12 @@ def nexus(align_rows, locus):
 def main():
 	args = get_args()
 	infile = open("{0}".format(args.in_file), 'r')
-	os.system("mkdir out")
+	if args.fasta:
+		os.system("mkdir out_fasta")
+	if args.phylip:
+		os.system("mkdir out_phylip")
+	if args.nexus:
+		os.system("mkdir out_nexus")
 	prev_parts = infile.readline().split('_') # Get number of first locus in infile
 	prev_locus = int(prev_parts[1])
 	infile.seek(0)
@@ -147,18 +156,18 @@ def main():
 				if args.remove_singletons: # Remove loci with only one sequence
 					if len(align_rows) > 1: 
 						if args.fasta:
-							fasta(align_rows, prev_locus)
+							fasta(align_rows, prev_locus, args.ploidy)
 						if args.phylip:
-							phylip(align_rows, prev_locus)
+							phylip(align_rows, prev_locus, args.ploidy)
 						if args.nexus:
-							nexus(align_rows, prev_locus)					
+							nexus(align_rows, prev_locus, args.ploidy)					
 				else: # Output all loci (including those with only one sequence)
 					if args.fasta:
-						fasta(align_rows, prev_locus)
+						fasta(align_rows, prev_locus, args.ploidy)
 					if args.phylip:
-						phylip(align_rows, prev_locus)
+						phylip(align_rows, prev_locus, args.ploidy)
 					if args.nexus:
-						nexus(align_rows, prev_locus)					
+						nexus(align_rows, prev_locus, args.ploidy)					
 				i += 1
 				align_rows = list()
 			sample = int(parts[3])
@@ -166,11 +175,11 @@ def main():
 			align_rows.append([sample, seq])
 			prev_locus = locus
 	if args.fasta:
-		fasta(align_rows, prev_locus)
+		fasta(align_rows, prev_locus, args.ploidy)
 	if args.phylip:
-		phylip(align_rows, prev_locus)
+		phylip(align_rows, prev_locus, args.ploidy)
 	if args.nexus:
-		nexus(align_rows, prev_locus)					
+		nexus(align_rows, prev_locus, args.ploidy)					
 	i += 1
 	infile.close()
 	print "Loci processed: {0}".format(i) # Total number of loci examined
