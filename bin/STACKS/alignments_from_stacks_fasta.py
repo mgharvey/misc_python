@@ -112,7 +112,7 @@ def nexus(align_rows, locus, ploidy):
 	out.write("#NEXUS\n")
 	out.write("Begin data;\n")
 	out.write("Dimensions ntax={0} nchar={1}\n".format(len(align_rows), len(align_rows[0][1])))
-	out.write("Format datatype=dna symbols=\"ACTG\" missing=? gap=-;samples = list()\n")
+	out.write("Format datatype=dna symbols=\"ACTG\" missing=? gap=-;\n")
 	out.write("Matrix;\n")
 	samples = list()
 	for align_row in align_rows: # Make a list of samples in this locus
