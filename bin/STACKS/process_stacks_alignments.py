@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 """
 
 Name: process_stacks_alignments.py
@@ -88,35 +86,24 @@ def main():
 				name = prename[:-1]
 				bases = parts[1]
 				if name in names:
-					new_bases = list()
-					previous_bases = new_align[sample_key[name]]
-					for i, base in enumerate(bases):
-						if base == previous_bases[i]:
-							new_base = base
-						elif base in ["A","C"] and previous_bases[i] in ["A","C"]:
-							new_base = "M"
-						elif base in ["A","G"] and previous_bases[i] in ["A","G"]:
-							new_base = "R"
-						elif base in ["A","T"] and previous_bases[i] in ["A","T"]:
-							new_base = "W"
-						elif base in ["C","G"] and previous_bases[i] in ["C","G"]:
-							new_base = "S"
-						elif base in ["C","T"] and previous_bases[i] in ["C","T"]:
-							new_base = "Y"
-						elif base in ["G","T"] and previous_bases[i] in ["G","T"]:
-							new_base = "K"
-						else:
-							print "Error!: {0} or {1} not a recognized nucleotide".format(base, previous_bases[i])
-						new_bases.append(new_base)
-					new_align[sample_key[name]] = ''.join(new_bases)						
+					bases_b = bases
+					new_align[sample_key[name]] = [bases_a, bases_b]
 				else:
-					new_align[sample_key[name]] = bases
+					bases_a = bases
+					new_align[sample_key[name]] = [bases_a, bases_a]
 				names.append(name)
 		if len(new_align) > 1: # Only print loci with >1 individual
 			out = open("{0}/{1}".format(args.out_dir, file), 'wb')
-			out.write(" {0} {1}\n".format(len(new_align), length))
+			out.write("#NEXUS\n\n")
+			out.write("Begin data;\n")
+			out.write("\tDimensions ntax={0} nchar={1};\n".format((2*len(new_align)), length))
+			out.write("\tFormat datatype=dna gap=-;\n")
+			out.write("\tMatrix\n")
 			for key in new_align:
-				out.write("{0}  {1}\n".format(key, new_align[key]))
+				out.write("{0}a\t{1}\n".format(key, new_align[key][0]))
+				out.write("{0}b\t{1}\n".format(key, new_align[key][1]))
+			out.write(";\n")
+			out.write("End;\n")
 			out.close()
 		infile.close()
 	map_file.close()
