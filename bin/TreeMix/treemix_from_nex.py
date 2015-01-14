@@ -3,7 +3,6 @@
 """
 
 Name: treemix_from_nex.py 
-
 Author: Michael G. Harvey
 Date: 12 May 2013
 
@@ -13,8 +12,8 @@ Treemix (Pickrell and Pritchard 2012).
 Usage: 	python treemix_from_nex.py input_file output_directory number_of_populations \
 			individuals_in_pop_1 individuals_in_pop_2 ... individuals_in_pop_n
 
-Note that TreeMix uses only biallelic SNPs, so any sites that do not represent biallelic SNPs 
-(including consideration of the outgroup), will not be used.
+Note that TreeMix uses only biallelic SNPs, so any sites that do not represent biallelic SNPs, will 
+not be used.
 
 """
 
@@ -57,17 +56,22 @@ def main():
 	out = open("{0}treemix_file_out.txt".format(args.out_dir), 'wb')
 	for x in range(args.populations):
 		out.write("pop{0} ".format(x+1)) 
-	out.write("outgroup\n")
+	out.write("\n")
 	total_size = 0
 	for w in xrange(alignment.get_alignment_length()):
 		total_size = 0
 		bases = alignment[:, w] 		
 		uniqs = list()
 		uniqs = list(set(bases))
-		if len(uniqs) != 2:
+		nmuniqs = list()
+		for uniq in uniqs: # Remove sites with missing data
+			if uniq not in ['?', 'n', '?', 'N']:
+				nmuniqs.append(uniq)			
+		if len(nmuniqs) != 2:
 			print "Skipping site {0} - not a biallelic SNP".format(w)	
 		else:
-			allele = bases[0]
+			allele1 = nmuniqs[0]
+			allele2 = nmuniqs[1]
 			total_size = 0
 			for x in range(args.populations):
 				pop_size = args.pop_sizes[x]
@@ -76,20 +80,11 @@ def main():
 				a = 0
 				b = 0
 				for pop_base in pop_bases:
-					if pop_base == allele:
+					if pop_base == allele1:
 						a += 1
-					else:
+					elif pop_base == allele2:
 						b += 1
 				out.write("{0},{1} ".format(a,b))
-			ogs = alignment[(total_size):(total_size+2), w]
-			a = 0
-			b = 0
-			for og in ogs:
-				if og == allele:
-					a += 1
-				else:
-					b += 1
-			out.write("{0},{1}".format(a,b))
 		out.write("\n")	
 		out.flush()
 	out.close()
