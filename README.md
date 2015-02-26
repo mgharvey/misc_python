@@ -20,3 +20,8 @@ Usage, etc.
 --------
 
 See the header within each script for information on usage, dependencies, etc.
+
+DOI
+--------
+
+[![DOI](https://zenodo.org/badge/10427/mgharvey/misc_python.svg)](http://dx.doi.org/10.5281/zenodo.15693)
