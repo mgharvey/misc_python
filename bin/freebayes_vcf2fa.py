@@ -9,13 +9,14 @@ Date: 4 August 2014
 
 Description: This script takes a vcf file output from freebayes (Garrison and Marth 2012), 
 a program for calling genotypes and outputting information from bam files, and converts it
-to genotype sequences for use in e.g. coalescent modeling and phylogenetics. The input vcf
-must have been run with the freebayes option --report-monomorphic, which outputs all bases
-including invariant sites. This script uses the freebayes genotype calls, but filters out 
-alleles if they fall below a user-defined minimum coverage value. It is designed for 
-either haploid or diploid individuals (ploidy must be assigned in the options). Any loci 
-containing more alleles than the set ploidy level will be removed from the output (and are
-listed in a separate summary file). 
+to haplotype sequences for use in e.g. coalescent modeling and phylogenetics. The input vcf
+must contain a single individual and have been run with the freebayes option 
+--report-monomorphic, which outputs all bases including invariant sites. This script uses 
+the freebayes genotype calls, but filters out alleles if they fall below a user-defined 
+minimum coverage value. It is designed for either haploid or diploid individuals (ploidy 
+must be assigned in the options). Any loci containing more alleles than the set ploidy 
+level will be removed from the output (and are listed in a separate summary file). An 
+output file is generated for the individual, containing both haplotypes at each locus. 
 
 Usage:
 
@@ -113,7 +114,8 @@ def main():
 	out = open("{0}".format(args.out_file), 'wb')
 	summary = open("{0}".format(args.summary_file), 'wb')
 	summary.write("Loci with more alleles than the set ploidy level:\n")
-	seq = list()
+	seq_a = list()
+	seq_b = list()
 	firstline = True
 	j = 0
 	k = 0
@@ -124,20 +126,26 @@ def main():
 			name = nameparts[0] # Edit for dist
 			if not firstline == True: # Loop to print each locus on separate line
 				if name != prev_name:
-					out.write(">{0}\n".format(name))
-					out.write("{0}\n".format(''.join(seq)))
-					seq = list()			
+					out.write(">{0}\n".format(prev_name))
+					out.write("{0}\n".format(''.join(seq_a)))
+					out.write(">{0}\n".format(prev_name))
+					out.write("{0}\n".format(''.join(seq_b)))
+					seq_a = list()			
+					seq_b = list()			
 			info = parts[7]
 			match = re.search('DP=(\d{1,10})', info)
 			depth = int(match.group(1))
-			base = None 
+			base_a = None 
+			base_b = None 
 			ref_allele = parts[3]
 			alt_allele = parts[4]
 			if depth < args.min_cov: # Output n's for sites with low read depth
-				base = "n"*len(list(ref_allele))			
+				base_a = "n"*len(list(ref_allele))			
+				base_b = "n"*len(list(ref_allele))			
 			else:
 				if alt_allele.rstrip() == ".": # If site corresponds to reference
-					base = ref_allele
+					base_a = ref_allele
+					base_b = ref_allele
 				else:
 					alleles = list()
 					depths = list()
@@ -185,18 +193,19 @@ def main():
 							print "Locus {0} contains paralogous reads".format(name)
 							j += 1							
 						elif args.ploidy == 2: # If diploid
-							if len(gt_allele_set[0]) == len(gt_allele_set[1]) == 1:
-								base = unphase(gt_allele_set[0], gt_allele_set[1])
-							else: # Deal with heterozygous complex polymorphisms
-								# Change this to be based on coverage?
-								gt_allele_set[0]
+							base_a = gt_allele_set[0]
+							base_b = gt_allele_set[1]
 							k += 1
 					elif len(gt_allele_set) == 1: # If 1 called allele
-						base = gt_alleles[0]
+						base_a = gt_alleles[0]
+						base_b = gt_alleles[0]
 					elif len(gt_allele_set) == 0: # If no alleles called
-						base = "n"*len(list(ref_allele)) # Insert n's
-			if base is not None: # If a genotype could be called
-				seq.append(base)
+						base_a = "n"*len(list(ref_allele)) # Insert n's
+						base_b = "n"*len(list(ref_allele)) # Insert n's
+			if base_a is not None: # If a genotype could be called
+				seq_a.append(base_a)
+			if base_b is not None: # If a genotype could be called
+				seq_b.append(base_b)
 			prev_name = name
 			firstline = False
 	print "{0} loci with paralogous reads detected and removed from output".format(j)
