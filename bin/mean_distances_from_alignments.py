@@ -13,7 +13,9 @@ in each alignment (each distance will be calculated only from those alignments w
 respective samples). Both uncorrected (p) distances and jukes-cantor distances are 
 calculated. Heterozygous sites can be included as IUPAC ambiguity codes and included in 
 the calculations (each allele counts for half of the distance at that site for that 
-individual). Be sure sample names are the same in each alignment.
+individual). Be sure sample names are the same in each alignment and that the input 
+directory doesn't contain any files except the alignments to examine.
+
 
 Usage:
 
